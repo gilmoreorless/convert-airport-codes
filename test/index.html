@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf8">
+    <title>Title</title>
+    <style>
+        #container {
+            display: flex;
+        }
+        .text-block {
+            border: 1px dashed #999;
+            border-radius: 1em;
+            margin: 1em;
+            padding: 0 1em;
+        }
+        abbr {
+            border-bottom: 1px dotted;
+            color: #36a;
+            cursor: help;
+        }
+    </style>
+</head>
+<body>
+    <template id="text-source">
+        <p>Flying SYD to MEL tomorrow.</p>
+        <p>Big couple of weeks! ✈️ SYD > SFO > LHR > SFO > PNH > REP > HKG > SYD (boom).</p>
+        <p>My 60-something year old mother-in-law has never ventured far from home, and now she’s doing WRO ✈️ CPH ✈️ SIN ✈️ SYD - what an adventure!</p>
+        <p>This WTF text just has some random TLA embedded within in it <span>OMG</span>, I wonder if it will replace a PIN code for an IBM ATM.</p>
+        <p>Some codes within sub-elements: <strong>JFK</strong>, <a href="#LAX">avoid LAX</a></p>
+        <p>A code that crosses element boundaries (shouldn’t be replaced): JF<span>K</span></p>
+        <p>This only has a non-code abbreviation of ZYX.</p>
+    </template>
+    <div id="container"></div>
+
+    <script src="../src/airport-codes.js"></script>
+    <script>
+        var tmpl = document.getElementById('text-source');
+        var container = document.getElementById('container');
+        var types = ['abbr', 'expand'];
+
+        types.forEach(function (type) {
+            var elem = document.createElement('div');
+            elem.className = 'text-block';
+            elem.id = 'test-' + type;
+
+            var title = document.createElement('h2');
+            title.textContent = type;
+            elem.appendChild(title);
+            elem.appendChild(document.importNode(tmpl.content, true));
+
+            airportCodes.replaceElement(elem, {method: type}).then(function (replaced) {
+                console.log('replaced', replaced);
+            });
+
+            container.appendChild(elem);
+        });
+    </script>
+</body>
+</html>
