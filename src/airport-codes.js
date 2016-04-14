@@ -1,7 +1,7 @@
 (function (root) {
     var airportCodes = root.airportCodes = {};
 
-    var rTLA = /\b[A-Z]{3}\b/g;
+    var rTLA = /\b[A-Z0-9]{3}\b/g;
     var codeData, dataPromise;
 
     function getData() {
