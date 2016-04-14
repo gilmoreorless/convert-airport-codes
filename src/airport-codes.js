@@ -8,10 +8,10 @@
         if (!dataPromise) {
             dataPromise = new Promise(function (resolve, reject) {
                 return fetch('../data/codes.json').then(function (response) {
-                    response.json().then(function (data) {
-                        codeData = data;
-                        resolve(data);
-                    });
+                    return response.json();
+                }).then(function (data) {
+                    codeData = data;
+                    resolve(data);
                 }).catch(reject);
             });
         }
