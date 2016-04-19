@@ -5,8 +5,18 @@
     var dataPath = '../data/codes.json';
     var codeData, dataPromise;
 
-    var getDataMethods = {
-        chromeExtension: function () {
+    var hooks = {
+        getData: function () {
+            return fetch(dataPath).then(function (response) {
+                return response.json();
+            });
+        }
+    };
+
+    if (root.chrome && root.chrome.extension && root.chrome.extension.sendMessage) {
+        root.document.documentElement.dataset.airportCodesInstalled = true;
+
+        hooks.getData = function () {
             return new Promise(function (resolve, reject) {
                 chrome.runtime.sendMessage({msg: 'codeDataPlease'}, function (response) {
                     if (response && response.codes) {
@@ -16,24 +26,26 @@
                     }
                 });
             });
-        },
-        default: function () {
-            return fetch(dataPath).then(function (response) {
-                return response.json();
-            });
-        }
-    };
+        };
 
-    var dataMethod = 'default';
-    if (root.chrome && root.chrome.extension && root.chrome.extension.sendMessage) {
-        dataMethod = 'chromeExtension';
+        hooks.replaceElement = function () {
+            var totalReplaced = root.document.querySelectorAll('abbr.airport-codes-inserted').length;
+            chrome.runtime.sendMessage({msg: 'replacedElements', count: totalReplaced});
+            return totalReplaced;
+        };
+    }
+
+    function hookPromise(promise, hookName) {
+        if (hooks[hookName]) {
+            return promise.then(hooks[hookName]);
+        }
+        return promise;
     }
 
     function getData() {
         if (!dataPromise) {
             dataPromise = new Promise(function (resolve) {
-                var fn = getDataMethods[dataMethod];
-                return fn().then(function (data) {
+                return hooks.getData().then(function (data) {
                     codeData = data;
                     resolve(data);
                     return data;
@@ -182,18 +194,19 @@ console.timeEnd('replace nodes')
     };
 
     airportCodes.replaceText = function (text) {
-        return getData().then(function () {
+        var promise = getData().then(function () {
             return replaceText(text);
         });
+        return hookPromise(promise, 'replaceText');
     };
 
     airportCodes.replaceElement = function (elem, options) {
         var opts = options || {};
-        return getData().then(function () {
+        var promise = getData().then(function () {
             return replaceElement(elem, opts);
         });
+        return hookPromise(promise, 'replaceElement');
     };
 
     console.log('airportCodes available', airportCodes, chrome);
-    airportCodes.replaceElement(document.body)
 })(this);
