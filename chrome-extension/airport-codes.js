@@ -133,6 +133,7 @@
             var abbr = doc.createElement('abbr');
             abbr.textContent = code.text;
             abbr.setAttribute('title', codeLocation(code.text));
+            abbr.className = 'airport-codes-inserted';
             frag.appendChild(subTextNode(textIndex, code.index));
             frag.appendChild(abbr);
             textIndex = code.index + 3;
@@ -171,6 +172,9 @@ console.timeEnd('node walker')
 console.time('replace nodes')
         nodeList.forEach(function (node) {
             var parent = node.parentNode;
+            if (parent.nodeName.toLowerCase() === 'abbr' && parent.classList.contains('airport-codes-inserted')) {
+                return;
+            }
             var replaced = replaceNode(node, options);
             if (replaced) {
                 parentList.push(parent);
