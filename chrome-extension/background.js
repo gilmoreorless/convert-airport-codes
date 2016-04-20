@@ -4,12 +4,12 @@
  * - Click browser action
  *     - √ If content script isn't in the page, inject it
  *         - √ getData() pulls from extension background instead of local file
- *         - Also add some simple CSS
+ *         - √ Also add some simple CSS
  *     - √ Run script in abbr mode
  *         - √ Don't replace anything that's already been replaced
  *     - √ Get count of replaced elements
  *     - √ Set icon badge to count of replacements for that tab ID
- *         - With proper colour
+ *         - √ With proper colour
  *         - Set error icon and different colour if it didn't work
  */
 
@@ -45,6 +45,7 @@ function setBadgeCount(tab, count) {
     if (count != null && count !== '') {
         badgeOptions.text = '' + count;
     }
+    chrome.browserAction.setBadgeBackgroundColor({tabId: tab.id, color: 'hsl(126, 93%, 33%)'});
     chrome.browserAction.setBadgeText(badgeOptions);
 }
 
