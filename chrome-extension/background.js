@@ -32,6 +32,9 @@ function injectContentScriptIfNeeded(tab) {
                     }
                     resolve(tab);
                 });
+                chrome.tabs.insertCSS(tab.id, {
+                    file: 'airport-codes.css'
+                });
             }
         });
     });
