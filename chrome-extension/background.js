@@ -2,24 +2,31 @@
  * Basic process
  *
  * - Click browser action
- *     - √ If content script isn't in the page, inject it
- *         - √ getData() pulls from extension background instead of local file
- *         - √ Also add some simple CSS
- *     - √ Run script in abbr mode
- *         - √ Don't replace anything that's already been replaced
- *     - √ Get count of replaced elements
- *     - √ Set icon badge to count of replacements for that tab ID
- *         - √ With proper colour
+ *     - If content script isn't in the page, inject it and some simple CSS
+ *     - Run script in abbr mode
+ *         - Don't replace anything that's already been replaced
+ *     - Get count of replaced elements
+ *     - Set icon badge to count of replacements for that tab
  *         - Set error icon and different colour if it didn't work
  */
 
 var codeData;
+
+var colors = {
+    good: 'hsl(126, 93%, 33%)',
+    warning: 'hsl(56, 83%, 43%)',
+    bad: 'hsl(16, 83%, 43%)'
+};
 
 function injectContentScriptIfNeeded(tab) {
     return new Promise(function (resolve, reject) {
         chrome.tabs.executeScript(tab.id, {
             code: 'document.documentElement.dataset.airportCodesInstalled;'
         }, function (results) {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+                return;
+            }
             if (results && results[0]) {
                 resolve(tab);
             } else {
@@ -45,12 +52,14 @@ function setBadgeCount(tab, count) {
     if (count != null && count !== '') {
         badgeOptions.text = '' + count;
     }
-    chrome.browserAction.setBadgeBackgroundColor({tabId: tab.id, color: 'hsl(126, 93%, 33%)'});
     chrome.browserAction.setBadgeText(badgeOptions);
 }
 
-function removeBadge(tab) {
-    setBadgeCount(tab, '');
+function setBadgeColor(tab, color) {
+    chrome.browserAction.setBadgeBackgroundColor({
+        tabId: tab.id,
+        color: color
+    });
 }
 
 function replaceAndGetCount(tab) {
@@ -67,8 +76,9 @@ function runConverter(tab) {
     injectContentScriptIfNeeded(tab)
         .then(replaceAndGetCount)
     .catch(function (err) {
-        alert(JSON.stringify(err));
-        // TODO: Update badge with error icon and show error somehow?
+        console.error('Airport codes conversion error:', err, tab);
+        setBadgeColor(tab, colors.bad);
+        setBadgeCount(tab, 'x');
     });
 }
 
@@ -77,6 +87,7 @@ function contentScriptMessageHandler(request, sender, sendResponse) {
         if (request.msg === 'codeDataPlease') {
             sendResponse({codes: codeData});
         } else if (request.msg === 'replacedElements') {
+            setBadgeColor(sender.tab, colors.good);
             setBadgeCount(sender.tab, request.count);
         }
     }
