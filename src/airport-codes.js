@@ -2,17 +2,54 @@
     var airportCodes = root.airportCodes = {};
 
     var rTLA = /\b[A-Z0-9]{3}\b/g;
+    var dataPath = '../data/codes.json';
     var codeData, dataPromise;
+
+    var hooks = {
+        getData: function () {
+            return fetch(dataPath).then(function (response) {
+                return response.json();
+            });
+        }
+    };
+
+    if (root.chrome && root.chrome.extension && root.chrome.extension.sendMessage) {
+        root.document.documentElement.dataset.airportCodesInstalled = true;
+
+        hooks.getData = function () {
+            return new Promise(function (resolve, reject) {
+                chrome.runtime.sendMessage({msg: 'codeDataPlease'}, function (response) {
+                    if (response && response.codes) {
+                        resolve(response.codes);
+                    } else {
+                        reject(response);
+                    }
+                });
+            });
+        };
+
+        hooks.replaceElement = function () {
+            var totalReplaced = root.document.querySelectorAll('abbr.airport-codes-inserted').length;
+            chrome.runtime.sendMessage({msg: 'replacedElements', count: totalReplaced});
+            return totalReplaced;
+        };
+    }
+
+    function hookPromise(promise, hookName) {
+        if (hooks[hookName]) {
+            return promise.then(hooks[hookName]);
+        }
+        return promise;
+    }
 
     function getData() {
         if (!dataPromise) {
-            dataPromise = new Promise(function (resolve, reject) {
-                return fetch('../data/codes.json').then(function (response) {
-                    return response.json();
-                }).then(function (data) {
+            dataPromise = new Promise(function (resolve) {
+                return hooks.getData().then(function (data) {
                     codeData = data;
                     resolve(data);
-                }).catch(reject);
+                    return data;
+                });
             });
         }
         return dataPromise;
@@ -96,6 +133,7 @@
             var abbr = doc.createElement('abbr');
             abbr.textContent = code.text;
             abbr.setAttribute('title', codeLocation(code.text));
+            abbr.className = 'airport-codes-inserted';
             frag.appendChild(subTextNode(textIndex, code.index));
             frag.appendChild(abbr);
             textIndex = code.index + 3;
@@ -129,6 +167,9 @@
         }
         nodeList.forEach(function (node) {
             var parent = node.parentNode;
+            if (parent.nodeName.toLowerCase() === 'abbr' && parent.classList.contains('airport-codes-inserted')) {
+                return;
+            }
             var replaced = replaceNode(node, options);
             if (replaced) {
                 parentList.push(parent);
@@ -146,16 +187,22 @@
     }
 
 
+    airportCodes.setDataPath = function (path) {
+        dataPath = String(path);
+    };
+
     airportCodes.replaceText = function (text) {
-        return getData().then(function () {
+        var promise = getData().then(function () {
             return replaceText(text);
         });
+        return hookPromise(promise, 'replaceText');
     };
 
     airportCodes.replaceElement = function (elem, options) {
         var opts = options || {};
-        return getData().then(function () {
+        var promise = getData().then(function () {
             return replaceElement(elem, opts);
         });
+        return hookPromise(promise, 'replaceElement');
     };
 })(this);

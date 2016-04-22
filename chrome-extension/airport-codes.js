@@ -147,9 +147,7 @@
 
     function replaceElement(elem, options) {
         // Quick short-circuit to avoid more DOM operations if there is no matching text
-console.time('find codes')
         var codes = findCodes(elem.textContent);
-console.timeEnd('find codes')
         if (!codes.length) {
             return [];
         }
@@ -164,12 +162,9 @@ console.timeEnd('find codes')
         });
         var nodeList = [];
         var parentList = [];
-console.time('node walker')
         while ((node = walker.nextNode())) {
             nodeList.push(node);
         }
-console.timeEnd('node walker')
-console.time('replace nodes')
         nodeList.forEach(function (node) {
             var parent = node.parentNode;
             if (parent.nodeName.toLowerCase() === 'abbr' && parent.classList.contains('airport-codes-inserted')) {
@@ -180,7 +175,6 @@ console.time('replace nodes')
                 parentList.push(parent);
             }
         });
-console.timeEnd('replace nodes')
         // De-duplicate the parent nodes
         var used = [];
         return parentList.filter(function (node) {
@@ -211,6 +205,4 @@ console.timeEnd('replace nodes')
         });
         return hookPromise(promise, 'replaceElement');
     };
-
-    console.log('airportCodes available', airportCodes, chrome);
 })(this);
