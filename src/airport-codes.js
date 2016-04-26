@@ -167,7 +167,7 @@
         }
         nodeList.forEach(function (node) {
             var parent = node.parentNode;
-            if (parent.nodeName.toLowerCase() === 'abbr' && parent.classList.contains('airport-codes-inserted')) {
+            if (parent.nodeName.toLowerCase() === 'abbr') {
                 return;
             }
             var replaced = replaceNode(node, options);
