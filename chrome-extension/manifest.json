@@ -1,9 +1,9 @@
 {
-  "name": "Airport code converter",
-  "version": "1.0.0",
+  "name": "Airport code explainer",
+  "version": "1.0.1",
   "manifest_version": 2,
   "description": "Look for IATA airport codes in a page and give them a tooltip with the full airport name.",
-  "homepage_url": "https://shoehornwithteeth.com",
+  "homepage_url": "https://shoehornwithteeth.com/",
   "icons": {
     "16": "icons/icon-16.png",
     "48": "icons/icon-48.png",
