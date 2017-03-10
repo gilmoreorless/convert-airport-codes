@@ -5,7 +5,7 @@ extdir := chrome-extension
 extzip := chrome-extension.zip
 
 iconsrc := src/emojione-plane-512.png
-iconsizes := {16,19,38,48,128,256}
+iconsizes := {16,19,32,38,48,64,96,128,256}
 icondir := $(extdir)/icons
 iconfiles := $(shell echo $(icondir)/icon-$(iconsizes).png)
 
