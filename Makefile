@@ -25,7 +25,9 @@ $(extdir): $(iconfiles) $(dataparsed) src/airport-codes.*
 	@touch $(extdir)  # To mark the directory as updated for other dependent commands
 
 chrome-extension.zip: $(extdir)
+	cp LICENSE $(extdir)
 	zip -r $(extzip) $(extdir) -x \*\/.DS_Store
+	rm -f $(extdir)/LICENSE
 
 
 icons: $(iconfiles)
