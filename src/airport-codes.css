@@ -1,4 +1,5 @@
 .airport-codes-inserted {
     border-bottom: 1px dotted;
     cursor: help;
+    text-decoration: inherit;
 }

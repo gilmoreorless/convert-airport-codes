@@ -1,7 +1,7 @@
 {
   "name": "Airport Code Explainer",
   "short_name": "Airport Codes",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "manifest_version": 2,
   "description": "Look for IATA airport codes in a page and give them a tooltip with the full airport name.",
   "icons": {
