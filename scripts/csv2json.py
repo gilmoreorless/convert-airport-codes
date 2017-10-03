@@ -5,7 +5,7 @@ import csv
 import json
 
 iata_re = re.compile('^[A-Z0-9]{3}$')
-exclude_re = re.compile('\[Duplicate\]|Erase Me')
+exclude_re = re.compile('[\[(]Duplicate[\])]|Erase Me')
 reader = csv.DictReader(sys.stdin)
 outfile = sys.stdout
 
