@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import re
 import sys
 import csv
@@ -9,17 +9,23 @@ exclude_re = re.compile('[\[(]Duplicate[\])]|Erase Me')
 reader = csv.DictReader(sys.stdin)
 outfile = sys.stdout
 
-outfile.writelines('{\n')
-joiner = ' '
+data = []
+
 for line in reader:
-    if iata_re.match(line['iata_code']):
-        prefix = '  %s "%s": ' % (joiner, line['iata_code'].upper())
+    code = line['iata_code']
+    if iata_re.match(code):
         if exclude_re.match(line['name']):
             continue
         obj = [line['name']]
         if line['municipality'] != '':
             obj.append(line['municipality'])
-        data = json.dumps(obj)
-        outfile.writelines(prefix + data + '\n')
-        joiner = ','
+        data.append([code, obj])
+
+outfile.writelines('{\n')
+joiner = ' '
+for line in sorted(data, key=lambda x: x[0]):
+    code, details = line
+    prefix = '  %s "%s": ' % (joiner, code)
+    outfile.writelines(prefix + json.dumps(details) + '\n')
+    joiner = ','
 outfile.writelines('}\n')
