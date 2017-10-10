@@ -22,7 +22,7 @@ $(icondir)/icon-%.png: $(iconsrc)
 
 $(extdir): $(iconfiles) $(dataparsed) src/airport-codes.*
 	cp src/airport-codes.* $(dataparsed) $(extdir)
-	@touch $(extdir)  # To mark the directory as updated for other dependent commands
+	@touch $(extdir)  # Mark the directory as updated for other dependent commands
 
 chrome-extension.zip: $(extdir)
 	cp LICENSE $(extdir)
