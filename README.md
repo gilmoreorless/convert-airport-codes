@@ -137,8 +137,8 @@ The library was written first and foremost for use in the browser extension, but
 ## Credits
 
 * This code is [MIT licensed](LICENSE) open source.
-* Airport data provided in the Public Domain by [OurAirports](http://ourairports.com/data/).
-* Icon from [EmojiOne](http://emojione.com/), licensed CC-BY 4.0.
+* Airport data provided in the Public Domain by [OurAirports](https://ourairports.com/data/).
+* Icon from [EmojiOne](https://github.com/joypixels/emojione), licensed CC-BY 4.0.
 
 
 [promise-api]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
