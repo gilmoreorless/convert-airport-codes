@@ -11,7 +11,7 @@ iconfiles := $(shell echo $(icondir)/icon-$(iconsizes).png)
 
 
 $(datasrc):
-	curl http://ourairports.com/data/airports.csv > $(datasrc)
+	curl https://davidmegginson.github.io/ourairports-data/airports.csv > $(datasrc)
 
 $(dataparsed): $(datasrc)
 	cat $(datasrc) | ./scripts/csv2json.py > $(dataparsed)
