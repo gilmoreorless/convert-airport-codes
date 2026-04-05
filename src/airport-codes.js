@@ -13,7 +13,7 @@
         }
     };
 
-    if (root.chrome && root.chrome.extension && root.chrome.extension.sendMessage) {
+    if (root.chrome && root.chrome.runtime && root.chrome.runtime.sendMessage) {
         root.document.documentElement.dataset.airportCodesInstalled = true;
 
         hooks.getData = function () {

@@ -20,30 +20,30 @@ var colors = {
 
 function injectContentScriptIfNeeded(tab) {
     return new Promise(function (resolve, reject) {
-        chrome.tabs.executeScript(tab.id, {
-            code: 'document.documentElement.dataset.airportCodesInstalled;'
-        }, function (results) {
-            if (chrome.runtime.lastError) {
-                reject(chrome.runtime.lastError);
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => document.documentElement.dataset.airportCodesInstalled,
+        }).then(function (results) {
+            console.log('[executeScript results]', results);
+            if (results?.[0]?.result) {
+                resolve(tab);
                 return;
             }
-            if (results && results[0]) {
+            return chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['airport-codes.js'],
+            })
+            .then(function () {
+                return chrome.scripting.insertCSS({
+                    target: { tabId: tab.id },
+                    files: ['airport-codes.css'],
+                });
+            })
+            .then(function () {
                 resolve(tab);
-            } else {
-                chrome.tabs.executeScript(tab.id, {
-                    file: 'airport-codes.js'
-                }, function () {
-                    if (chrome.runtime.lastError) {
-                        reject(chrome.runtime.lastError);
-                        return;
-                    }
-                    resolve(tab);
-                });
-                chrome.tabs.insertCSS(tab.id, {
-                    file: 'airport-codes.css'
-                });
-            }
-        });
+            });
+        })
+        .catch(reject);
     });
 }
 
@@ -52,34 +52,31 @@ function setBadgeCount(tab, count) {
     if (count != null && count !== '') {
         badgeOptions.text = '' + count;
     }
-    chrome.browserAction.setBadgeText(badgeOptions);
+    chrome.action.setBadgeText(badgeOptions);
 }
 
 function setBadgeColor(tab, color) {
-    chrome.browserAction.setBadgeBackgroundColor({
+    chrome.action.setBadgeBackgroundColor({
         tabId: tab.id,
         color: color
     });
 }
 
 function replaceAndGetCount(tab) {
-    return new Promise(function (resolve) {
-        chrome.tabs.executeScript(tab.id, {
-            code: 'airportCodes.replaceElement(document.body);'
-        }, function () {
-            resolve();
-        });
+    return chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => airportCodes.replaceElement(document.body),
     });
 }
 
 function runConverter(tab) {
     injectContentScriptIfNeeded(tab)
         .then(replaceAndGetCount)
-    .catch(function (err) {
-        console.error('Airport codes conversion error:', err, tab);
-        setBadgeColor(tab, colors.bad);
-        setBadgeCount(tab, 'x');
-    });
+        .catch(function (err) {
+            console.error('Airport codes conversion error:', err, tab);
+            setBadgeColor(tab, colors.bad);
+            setBadgeCount(tab, 'x');
+        });
 }
 
 function contentScriptMessageHandler(request, sender, sendResponse) {
@@ -93,7 +90,7 @@ function contentScriptMessageHandler(request, sender, sendResponse) {
     }
 }
 
-chrome.browserAction.onClicked.addListener(runConverter);
+chrome.action.onClicked.addListener(runConverter);
 chrome.runtime.onMessage.addListener(contentScriptMessageHandler);
 
 // Get and cache the code data
